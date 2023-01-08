@@ -110,5 +110,18 @@ If *err* is not nil, something when wrong and the error value describes the prob
 
 > Functions and other package-level entities may be declared in any order
 
-A *map* is a reference to the data structure created by make. When a map is passed to a function, 
-the function receives a copy of the reference.
+#### Readfile (from the io/ioutil package)
+- Reads named files (not the standard input)
+
+### 1.4 Animated GIFs
+Mainly introduces Go functionality
+
+### 1.5 Fetching a URL
+- Use *net/http* and *io* packages
+
+*http.Get* makes an HTTP requests and, if there is not an error, returns the result in the response
+struct *resp*. The *Body* field of *resp* contains the server response as a readable stream. 
+*io.ReadAll* reads the entire response and the result is stored in *b*. The *Body* stream is closed to avoid
+leaking resources.
+
+### 1.6 Fetching URLs Concurrently
