@@ -1,5 +1,7 @@
 # Learning Go
 
+> Credits: Large portions of text are from *The Go Programming Language* by Donovan and Kernighan
+
 ## Chapter 1
 
 ### 1.1 Hello, World
@@ -62,7 +64,7 @@ for {
 **Iterate over a range of values from a string or a slice**
 ```
 for _, arg := range os.Args[1:] {
-
+    // ...
 }
 ```
 
@@ -74,10 +76,12 @@ for _, arg := range os.Args[1:] {
 ### 1.3 Finding Duplicate Lines
 
 **Map** \
-A *map* holds a set of key/value pairs and provides constant-time operations to store, retrieve, or test for an item in the set. The key many be of any type whose values can be compared with ==, the value can be anytype.
+A *map* holds a set of key/value pairs and provides constant-time operations to store, retrieve, or test for an item in 
+the set. The key many be of any type whose values can be compared with ==, the value can be anytype.
 
 **bufio** \
-Makes input and output efficient and convient. Scanner is a useful feature that reads input and breaks it into lines or worlds
+Makes input and output efficient and convenient. Scanner is a useful feature that reads input and breaks it into lines or 
+worlds.
 
 **Printf** 
 ```
@@ -95,3 +99,16 @@ Makes input and output efficient and convient. Scanner is a useful feature that 
 - tab \t
 - newline \n
 - Printf does not write newline by default
+
+#### File opening
+**os.Open** returns two values:
+1. An open file (*os.File) that is used in subsequent reads by the Scanner
+2. Value of the built-in *error* type. If err equals the special built-in value *nil*, the file was opened successfully.
+
+The file is read and when the end of the input is reached, use *Close* to close the file and releases any resources.
+If *err* is not nil, something when wrong and the error value describes the problem.
+
+> Functions and other package-level entities may be declared in any order
+
+A *map* is a reference to the data structure created by make. When a map is passed to a function, 
+the function receives a copy of the reference.
