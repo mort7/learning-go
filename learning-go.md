@@ -36,7 +36,7 @@ Use **os.Args** to access command line arguments. It is a slice (dynamically siz
 #### Loop Statements
 The *for* loop is the only loop statement in Go.
 
-```
+```go
 for initialization; condition; post {
     // zero or more statements
 }
@@ -47,14 +47,14 @@ for initialization; condition; post {
 - The loop ends when the condition becomes false
 
 **Traditional "while" loop**
-```
+```go
 for condition {
     // ...
 }
 ```
 
 **Traditional infinite loop**
-```
+```go
 for {
     // ...
 }
@@ -62,7 +62,7 @@ for {
 - Can be terminated by a break or return statement
 
 **Iterate over a range of values from a string or a slice**
-```
+```go
 for _, arg := range os.Args[1:] {
     // ...
 }
@@ -230,3 +230,116 @@ Go *keywords*
 >If the name begins with a **capital** letter, it is 
 > exported and visible/accessible outside of its own package. Package names
 > themselves are always lower case
+
+### 2.2 Declarations
+
+A *declaration* names a program entity and specifies some or all of its properties. 
+There are four major kinds of declarations: *var*, *const*, *type*, and *func*
+
+A *Go* program is stored in one or more file whose names end in .go. Each file begins with a package declaration that 
+says what package the file is a part of. The *package* declaration is followed by any import declarations, then a sequence of
+*package-level* declarations of types, variables, constants, and functions in any order.
+
+A function declaration has a name, a list of parameters (the variables are provided by the function's callers), 
+an optional list of results, and the function body, which contains the statements that define what the function does. 
+The results list is omitted if the function does not return anything. 
+
+### 2.3 Variables
+
+A *var* declaration creates a variable of a particular type, attaches a name to it, and sets its initial value.
+Each declaration has the general form
+```go
+var name type = expression
+```
+
+Either the type or the *= expression* part may be omitted but not both. If the type is omitted, it is determined by the 
+initializer expression. If the expression is omitted, the initial value is the *zero value* for the type- 0 for numbers,
+false for booleans, "" for strings, and nil for interfaces and reference types (slice, pointer, map, channel, function).
+The zero value of an aggregate type like an array or struct has zero value of all its elements or fields.
+
+> The zero-value mechanism ensures that a variable always holds a well-defined value of its type; in Go there is no
+> such thing as an uninitialized variable. 
+
+```go
+var s string
+fmt.Println(s)      // Prints ""
+```
+
+```go
+var i, j, k int                     // int, int, int
+var b, f, s = true, 2.3, "four"     // bool, float64, string
+```
+
+> Initializers may be literal values or arbitrary expressions. Package-level variables are initialized before *main* 
+> begins and local variables are initialized as their declarations are encountered before function execution.
+
+A set of variables can also be initialized by calling a function that returns multiple values:
+```go
+var f, err = os.Open(name)          // os.Open returns a file and an error
+```
+
+#### 2.3.1 Short Variable Declarations
+
+> Within a function, an alternate form called a *short variable declaration* may be used to declare and initialize
+> local variables. It takes the form *name := expression*, and the type of *name* is determined by the expression.
+
+Because of their brevity and flexibility, short variable declarations are used to declare and initialize the majority of
+local variables. A *var* declaration tends to be reserved for local variables that need an explicit type that differs
+from that of the initializer expression, or for when the variable will be assigned a value later and its initial value
+is unimportant.
+
+```go
+i := 100                        // an int
+var boiling float64 = 100        // a float64
+
+var names []string
+var err error
+var p Point
+```
+
+As with *var* declarations, multiple variables may be declared and initialized in the same short variable declaration:
+```go
+i, j := 0, 1
+```
+
+> Keep in mind that := is a declaration, whereas = is an assignment
+
+Like ordinary *var* declarations, short variable declarations may be used for calls to functions like
+os.Open that return two or more values.=
+
+```go
+f, err := os.Open(name)
+if err != nil {
+	return err
+}
+// ...use f
+f.Close()
+```
+
+> One subtle but important point: a short variable declaration does not necessarily 
+> *declare* all the variables on its left-hand side. If some were already declared in the 
+> *same* lexical block, then the short variable declaration acts like an *assignment* to those
+> variables
+
+In the code below, the first statement declares both *in* and *err*. The second declares *out* but only assigns a value
+to the existing *err* variable
+```go
+in, err := os.Open(infile)
+// ...
+out, err := os.Create(outfile)
+```
+
+A short variable declaration must declare at least one new variable, so this code
+will not compile:
+```go
+f, err := os.Open(infile)
+f, err := os.Create(outfile)  // compile error: no new variables
+```
+
+The fix is to use an ordinary assignment for the second statement.
+```go
+f, err := os.Open(infile)
+f, err = os.Create(outfile)  // This works
+```
+
+#### 2.3.2 Pointers
