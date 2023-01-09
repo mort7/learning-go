@@ -2,7 +2,7 @@
 
 > Credits: Large portions of text are from *The Go Programming Language* by Donovan and Kernighan
 
-## Chapter 1
+## Chapter 1 - Tutorial
 
 ### 1.1 Hello, World
 Go is a compiled language. It is organized into packages (similar to libraries or modules in other languages). A **package** consists of one or more .go source files in a single directory that defines what the program does. Each source file contains a package declaration that define what the package does. This is followed by **imports**.
@@ -125,3 +125,108 @@ struct *resp*. The *Body* field of *resp* contains the server response as a read
 leaking resources.
 
 ### 1.6 Fetching URLs Concurrently
+
+A *goroutine* allows for concurrent function execution. A *channel* is a communication mechanism that allows
+one goroutine to pass values of a specified type to another goroutine. The function main runs in a goroutine and
+the *go* statement creates additional goroutines. When one goroutine attempts a send or receive on a channel, it 
+blocks until another goroutine attempts the corresponding send or receive operation, at which point the value is 
+transferred and both goroutines proceed. 
+
+### 1.7 A Web Server
+
+Create handler functions for request that match paths. Listens on localhost:8000
+
+### 1.8 Loose Ends
+
+*Control Flow*: Switch statement does not fall through like other C-like languages (there
+is a fallthrough statement if needed)
+
+*Named types*: A type declaration makes it possible to give a name to an existing type
+
+*Pointers*: Go provides pointers- values that contain the address of a variable
+Pointers are explicitly visible. The *&* operator yields the address of a variable and the * operator retrieves 
+the variable 
+
+*Methods and interfaces*: A method is a function associated with a named type. Interfaces are 
+abstract types that let us treat different concrete types in the same way
+based on what methods they have, not how they are represented or implemented.
+
+*Packages*: There are many packages released that are extremely useful.
+
+*Comments*: 
+/* ... */ for multiple line comments
+// for everything else
+
+## Chapter 2: Program Structure
+
+### 2.1 Names
+
+The names of Go functions, variables, types, statement labels and packages follow
+a simple rule: a name begins with a letter or an underscore and may have any number 
+of additional letters, digits, and underscores. Case matters: heapSort and Heapsort are different names
+
+Go *keywords*
+- break
+- case
+- chan
+- const
+- continue
+- default
+- defer
+- else
+- fallthrough
+- for
+- func
+- go
+- goto
+- if
+- import
+- interface
+- map
+- package
+- range
+- return
+- select
+- struct
+- switch
+- type
+- var
+
+*Constants*
+- true
+- false
+- iota
+- nil
+
+*Types*
+- int, int8, int16, int32, int64
+- uint, uint8, uint16, uint32, uint64, uintptr
+- float32, float64, complex64, complex128
+- bool
+- byte
+- rune
+- string
+- error
+
+*Functions*
+- make
+- len
+- cap
+- new
+- append
+- copy
+- close
+- delete
+- complex
+- real
+- imag
+- panic
+- recover
+
+> If an entity is declared within a function, it is *local* to that function. If it 
+> is declared outside the function, it is visible to all files of the package 
+> that it belongs to
+
+>If the name begins with a **capital** letter, it is 
+> exported and visible/accessible outside of its own package. Package names
+> themselves are always lower case
