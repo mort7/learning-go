@@ -343,3 +343,69 @@ f, err = os.Create(outfile)  // This works
 ```
 
 #### 2.3.2 Pointers
+
+A *variable* is a piece of storage containing a value. Variables created by declarations are identified by a name,
+such as *x*.
+
+A *pointer* value is the address of a variable. A pointer is the location at which a value is stored. With a pointer, 
+we can read or update the value of a variable *indirectly*, without using or knowing the name of the variable.
+
+If a variable is declared var x int, the expression &x ("address of x") yields a pointer to an integer variable, that 
+is, a value of type *int, which is "pointer to int". If this value is called p, we say "p points to x". The variable to 
+which p points is written *p. The expression *p yields the value of that variable, an int, but since *p
+denotes a variable, it may also appear on the left-hand side of an assignment, in which case the assignment
+updates the variable.
+
+```go
+x := 1
+p := &x                     // p, of type *int, points to x
+fmt.Println(*p)             // "1"
+*p = 2                      // equivalent to x = 2
+fmt.Println(x)              // "2"
+```
+
+Each component of a variable of aggregate type- a field of a struct or element of an array- is also a
+variable and thus has an address too. Variables are sometimes described as *addressable* values. Expressions that 
+denote variables are the only expressions to which the *address-of* operate & may be applied. 
+
+> The zero value for a pointer of any type is *nil*. The test p != nil is true if *p* points to a variable. 
+> Pointers are comparable, two pointers are equal if and only if they point to the same variable or both
+> are nil.
+
+```go
+var x, y int
+fmt.Println(&x == &x, &x == &y, &x == nil)      // "true false false"
+```
+
+x and y here are initialized to their zero value here. Remember that Go does not have uninitialized variables.
+So x and y both have values, hence why &x != &y. If they both were nil, they would be equal but are not in this case.
+
+It is perfectly safe for a function to return the address of a local variable. For instance, in the code below, the 
+local variable *v* created by this particular call to *f* will remain in existence even after the call has returned,
+and the pointer *p* will still refer to it:
+
+```go
+var p = f()
+func f() *int {
+	v := 1
+	return &v
+}
+```
+
+Each call of f returns a distinct value:
+```go
+fmt.Println(f() == f())     // "false"
+```
+
+Because a pointer contains the address of a variable, passing a pointer argument to a function
+makes it possible for the function to update the variable that was indirectly passed.
+
+```go
+func incr(p *int) int {
+	*p++                // increments what p points to; does not change p
+	return *p
+}
+v := 1
+incr(&v)                // side effect: v is now 2
+fmt.Println(incr(&v))   // "3" (and v is 3)
+```
