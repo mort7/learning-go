@@ -409,3 +409,231 @@ v := 1
 incr(&v)                // side effect: v is now 2
 fmt.Println(incr(&v))   // "3" (and v is 3)
 ```
+
+Each time we take the address of a variable or copy a pointer, we create new *aliases* or ways 
+to identify the same variable. For example, *p is an alias for *v*. Pointer aliasing is useful because it 
+allows us to access a variable without using its name, but this is a double-edged sword:
+to find all the statements that access a variable, we have to know all of its aliases.
+
+flag package is useful for command line arguments
+
+#### The *new* Function
+
+Another way to create a variable is to use the built-in function *new*. The expression *new*(T) creates an
+*unnamed variable* of type T, initializes it to the zero value of T, and returns its address,
+which is a value of type *T. A variable created with *new* is no different from an ordinary local
+variable whose address is taken, except that there's no need to invent (and declare) a dummy name, and we can use new(T)
+in an expression. Thus *new* is only syntactic convenience, not a fundamental notion: the two newInt functions
+below have identical behaviors.
+
+```go
+func newInt() *int {
+	return new(int)
+}
+
+func newInt() *int {
+	var dummy int
+	return &dummy
+}
+```
+Each new call to a *new* returns a distinct variable with a unique address:
+```go
+p := new(int)
+q := new(int)
+fmt.Println(p == q)     // "false"
+```
+
+There is one exception to this rule: two variables whose type carries no information and is therefore of size
+zero, such as struct{} or [0]int, may, depending on the implementation have the same address.
+
+The *new* function is relatively rarely used because the most common unnamed variables
+are of struct types, for which the struct literal syntax is more flexible.
+
+Since *new* is a predeclared function, not a keyword, it's possible to redefine the name for something else within a 
+function.
+
+```go
+func delta(old, new int) int { return new - old }
+```
+
+Of course, within *delta*, the built-in *new* function is unavailable.
+
+#### 2.3.4 Lifetime of Variables
+
+The *lifetime* of a variable is the interval of time it exists during program execution.
+The lifetime of a package-level variable is the entire program. By contrast, local variables have dynamic lifetimes: 
+a new instance is created each time the declaration statement is executed, and the variable lives on until it becomes
+*unreachable*, at which point its storage may be recycled. Function parameters and results are 
+local variables too; they are created each time their enclosing function is called. 
+
+For example, in this excerpt from the Lissajous program of Section 1.4,
+
+```go
+for t := 0.0, t < cycles*2*math.Pi; t += res {
+	x := math.Sin(t)
+	y := math.Sin(t*freq + phase)
+	img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), 
+		blackIndex)
+}
+```
+
+The variable *t* is created each time the *for* loop beings, and new variables *x* and *y* are created on 
+each iteration of the loop.
+
+How does the garbage collector know that a variable's storage can be reclaimed?
+
+The full answer is more detailed than we need here, but the basic idea is that every package-level variable
+and every local variable of each currently active function, can potentially be the start or root
+of a path to the variable in question (by following pointers and other kinds of references). If no
+such path exists, the variable has become unreachable.
+
+A compiler may choose to allocate local variables on the heap or on the stack, but surprisingly, this choice is not 
+determined by whether *var* or *new* was used to declare the variable.
+
+```go
+var global *int
+
+func f() {
+	var x int
+	x = 1
+	global = &x
+}
+
+func g() {
+	y := new(int)
+	*y = 1
+}
+```
+
+Here, *x* must be heap-allocated because it is still reachable from the variable *global* after *f* has returned,
+despite being declared as a local variable; we say x *escapes from* f. Conversely, when *g* returns, the variable *y 
+becomes unreachable and can be recycled. Because *y does not escape, it is safe for the compiler to allocated
+*y on the stack, even though it was allocated with *new*. In any case, the notion of escaping is not something that you 
+need to worry about in order to write correct code, though it's good to keep in mind during performance optimization, 
+since each variable that escapes requires an extra memory allocation.
+
+### 2.4 Assignments
+
+The value held by a variable is updated by an assignment statement, which in its simplest form has a variable
+on the left of the = sign and an expression on the right.
+
+```go
+x = 1                               // named variable
+*p = true                           // indirect variable
+person.name = "bob"                 // struct field
+count[x] = count[x] * scale         // array or slice or map element
+```
+
+Each of the arithmetic and bitwise binary operators has a corresponding *assignment operator* allowing, for example, 
+the last statement to be rewritten as
+
+```go
+count[x] *= scale
+```
+
+which saves us from having to repeat (and re-evaluate) the expression for the variable. Numeric variables can also be 
+incremented and decremented by ++ and -- statements:
+
+```go
+v := 1
+v++       // save as v = v + 1; v becomes 2
+v--       // same as v = v - 1; v becomes 1 again
+```
+
+#### 2.4.1 Tuple Assignment
+
+*Tuple assignment* allows several variables to be assigned at once.
+```go
+x, y = y, x
+```
+
+```go
+func fib(n int) int {
+    x, y := 0, 1
+	for i := 0; i < n; i++ {
+		x, y = y, x+y
+	}
+	return x
+}
+```
+
+Tuple assignment can also make a sequence of trivial assignments more compact
+```go
+i, j, k = 2, 3, 5
+```
+
+Certain expressions, such as a call to a function with multiple results, produce several values.
+```go
+f, err = os.Open("foo.txt")     // function call returns two values
+```
+
+A map lookup, type assertion, and channel receive produce two results
+```go
+v, ok = m[key]          // map lookup
+v, ok = x.(T)           // type assertion
+v, ok = <- ch           // channel receive
+```
+
+#### 2.4.2 Assignability
+
+Assignment statements are an explicit form of assignment, but there are places where things are
+*implicitly* assigned:
+```go
+medals := []string{"gold", "silver", "bronze"}
+```
+
+is the same as
+```go
+medals[0] = "gold"
+medals[1] = "silver"
+medals[2] = "bronze"
+```
+
+In general, each type (left and right) must match. *nil* may be assigned to any variable,
+of interface or reference type. Constants are more flexible.
+
+### 2.5 Type Declarations
+
+A type declaration defines a new *named type* that has the same *underlying type* as an existing 
+type. The named type provides a way to separate different and perhaps incompatible uses of
+the underlying type so they can't be mixed unintentionally.
+
+```go
+type name underlying-type
+```
+
+Type declarations most often appear at the package level, where the named type is visible
+throughout the package, and if the name is exported (it starts with an upper-case letter), 
+it's accessible from other packages as well.
+
+### 2.6 Packages and Files
+Packages in Go serve the same purposes as libraries or modules in other languages, supporting modularity, encapsulation,
+separate compilation, and reuse. The source code for a package resides in one or more .go files, usually in a directory 
+whose name ends with the import path.
+
+Each package serves as a separate *name space* for its declarations. Within, the *image* package,
+for example, the identifier *Decode* refers to a different function than does the same identifier
+in the *unicode/utf16* package. To refer to a function outside its package, we must *qualify* the identifier
+to make explicit whether we mean *image.Decode* or *utf16.Decode*
+
+Packages also let us hide information by controlling which names are visible outside the package, or *export*. 
+
+#### 2.6.1 Imports
+
+The last segment of the import path is used as a short name for imported packages.
+
+#### 2.6.2 Package Initialization
+
+Package initialization begins by initializing package-level variables in the order in which they are declared,
+except that dependencies are resolved first (if variables require other variables to be initialized).
+
+If the package has multiple .go files, they are initialized in the order in which the files are given to the compiler,
+the go tool sorts .go files by name before invoking the compiler.
+
+Each variable declared at package level starts life with the value of its initializer expression, 
+if any. But for some variables, like tables of data, an initializer expression may not be the simplest way 
+to set its initial value. In that case, the *init* function mechanism may be simpler. Any file many contain any number 
+of functions whose declaration is just func init() { /* ... */ } 
+
+Such *init* functions can't be called or referenced, but otherwise they are normal functions. Within each file,
+*init* functions are automatically executed when the program starts, in the other in which they are declared.
