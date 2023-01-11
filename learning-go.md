@@ -637,3 +637,5 @@ of functions whose declaration is just func init() { /* ... */ }
 
 Such *init* functions can't be called or referenced, but otherwise they are normal functions. Within each file,
 *init* functions are automatically executed when the program starts, in the other in which they are declared.
+
+Packages are initialized bottom-up so *main* is initialized last.
