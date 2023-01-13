@@ -639,3 +639,40 @@ Such *init* functions can't be called or referenced, but otherwise they are norm
 *init* functions are automatically executed when the program starts, in the other in which they are declared.
 
 Packages are initialized bottom-up so *main* is initialized last.
+
+### 2.7 Scope
+
+A declaration associates a name with a program entity, such as a function or a variable. The *scope* of a declaration 
+is the part of the source code where a use of the declared name refers to that declaration. The scope of a declaration
+is a region of text, it is a compile-time property. The lifetime of a variable is the range of time
+during execution when the variable can be referred to by other parts of the program; it is a run-time property.
+
+A *syntactic block* is a sequence of statements enclosed in braces (function or loop), declarations inside are not
+visible outside the syntactic block. A *lexical block* are other groupings of declarations that are not explicitly 
+surrounded by braces. There is a lexical block for the entire source code, called the universe block, for each package,
+for each file, for each `for`, `if`, and `switch`, for each case in a `switch` or `select` statement, and for each
+syntactic block. 
+
+Declarations outside a function are at the package level.
+
+You may have multiple declarations of the same name as long as each is in a different lexical block.
+
+> When the compiler encounters a reference to a name, it looks for a declaration, starting with the innermost 
+> enclosing lexical block and working up to the universe block. If the compiler finds no declaration, it reports 
+> an ‘‘undeclared name’’ error. If a name is declared in both an outer block and an inner block, the inner declaration 
+> will be found first. In that case, the inner declaration is said to shadow or hide the outer one, making it 
+> inaccessible
+
+
+```go
+func f() {}
+
+var g = "g"
+
+func main() {
+	f := "f"
+	fmt.Println(f)      // "f"; local var f shadows package-level func f
+	fmt.Println(g)      // "g"; package-level var
+	fmt.Println(h)      // compile error: undefined: h
+}
+```
