@@ -676,3 +676,30 @@ func main() {
 	fmt.Println(h)      // compile error: undefined: h
 }
 ```
+
+## Chapter 3: Basic Data Types
+
+Go's types fall into four categories: *basic types*, *aggregate types*, *reference types*, and *interface types*.
+
+### 3.1 Integers
+
+Four sizes- 8, 16, 32, 64 bits
+Signed and unsigned 
+
+The type *rune* is a synonym for int32 and conventionally indicates that a value is a Unicode code point.
+
+The type *byte* is a synonym for uint8, and emphasizes that the value is a piece of raw data 
+rather than a small numeric quantity. 
+
+Finally, there is a type uintptr, whose width is not specified but is sufficient to hold all the bits of a pointer value.
+The *uintptr* type is used only for low-level programming, such as at the boundary of a Go program with a C library or 
+an operating system. 
+
+int is not that same type as int32, even if the natural size of int is 32 bits
+
+Signed numbers are represented in 2's-complement form
+
+Signed ints range from -2<sup>n-1</sup> through 2<sup>n-1</sup>-1
+Unsigned ints range from 0 to 2<sup>n-1</sup>
+
+int8 is -128 to 127 while uint8 is 0 to 255
