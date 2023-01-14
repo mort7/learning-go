@@ -700,6 +700,45 @@ int is not that same type as int32, even if the natural size of int is 32 bits
 Signed numbers are represented in 2's-complement form
 
 Signed ints range from -2<sup>n-1</sup> through 2<sup>n-1</sup>-1
-Unsigned ints range from 0 to 2<sup>n-1</sup>
+Unsigned ints range from 0 to 2<sup>n</sup>-1
 
 int8 is -128 to 127 while uint8 is 0 to 255
+
+Go's binary operators for arithmetic, logic, and comparison- listed in order of decreasing
+precedence:
+```go
+* / % << >> & &^ +-|^
+== != < <= > >=
+&&
+||
+```
+
+There are only five levels of precedence, operators at the same level associate to the left, so parentheses may be 
+required for clarity, or to make operators evaluate in the intended order in an expression like `mask & (1 << 28)`.
+
+Each operator in the first two lines of the table above for instance +, has a corresponding assignment
+operator like += that may be used to abbreviate an assignment.
+
+> +, -, *, and / may be applied to integer, floating-point, and complex numbers, but the remainder operator % applies 
+> only to integers. In Go, the sign of the remainder is always the same as the sign of the dividend. 
+
+>The behavior of / depends on whether its operands are integers, so 5.0/4.0 is 1.25 but 5/4 is 1 because
+> integer division truncates the result toward zero
+
+*Overflow* can happen if the integers are too large to fit into it's resulting type
+
+Binary comparison can be used with ints
+
+Go provides the following bitwise binary operators, the first four treat their operands as bit patterns
+with no concept of arithmetic carry or sign:
+
+```go
+&       // bitwise AND
+|       // bitwise OR
+^       // bitwise XOR
+&^      // bit clear (AND NOT) << left shift
+>>      // right shift
+```
+
+### 3.2 Floating-Point Numbers
+
