@@ -742,3 +742,164 @@ with no concept of arithmetic carry or sign:
 
 ### 3.2 Floating-Point Numbers
 
+float32 provides ~6 decimal digits of precision while float64 provides about 15 digits. Use float64 because computations
+can accumulate error rapidly unless one is quite careful.
+
+> Very small and large numbers are better written in scientific notation
+
+### 3.3 Complex Numbers
+
+Go provides two sizes of complex numbers, `complex64` and `complex128`, whose complements are
+`float32` and `float64` respectfully.
+
+```go
+var x complex128 = complex(1, 2)        // 1+2i
+var y complex128 = complex(3, 4)        // 3+4i
+fmt.Println(x*y)                        // "(-5+10i)"
+fmt.Println(real(x*y))                  // "-5"
+fmt.Println(imag(x*y))                  // "10"
+```
+
+### 3.4 Booleans
+
+type `bool` or *boolean* has only two possible values- `true` and `false`
+
+`!` is the negation operator
+
+`&&` (AND) and `||` (OR) operators have *short circuit* behavior, making it safe to write expressions like:
+```go
+s != "" && s[0] == 'x'
+```
+
+### 3.5 Strings
+
+A string is an immutable sequence of bytes. String may contain arbitrary data, but usually contain human-readable text.
+Text strings are conventionally interpreted as UTF-8 encoded sequences of Unicode code points (runes).
+
+The built-in `len` returns the number of bytes (not runes), and the *index* operation returns the 
+*i*-th byte of string s
+
+Concatenate using `+`
+
+#### 3.5.1 String Literals
+
+A string value can be written as a *string literal*, a sequence of bytes enclosed in double quotes.
+
+Go source files are always encoded in UTF-8 and Go text strings are conventionally interpreted as UTF-8, 
+we can include Unicode code points in string literals.
+
+Within a double-quoted string literal, *escape sequences* that begin with a backslash \ can be used to insert
+arbitrary byte values into the string:
+```go
+\a ‘‘alert’’ or bell
+\b backspace
+\f form feed \n newline
+\r carriage return
+\t tab
+\v vertical tab
+\' single quote (only in the rune literal '\'') 
+\" double quote (only within "..." literals) 
+\\ backslash
+```
+
+Hex values can be written with a *hexidecimal escape* `\xhh` 
+
+A raw string literal is written using back-quotes instead of double quotes. These are helpful for regular expressions.
+They are also useful for HTML templates, JSON literals, etc.
+
+#### 3.5.2 Unicode
+
+Unicode version 8 defines code points for over 120,000 characters in over 100 languages.
+
+#### 3.5.3 UFT-8
+
+UTF-8 is a variable-length encoding of Unicode code points as bytes.
+
+#### 3.5.4 Strings and Bytes Slices
+
+Four standard packages are particularly important for manipulating strings:
+- `bytes`
+  - similar to string but of type `[]byte`
+  - Useful to use a byte buffer while building strings and strings are immutable
+- `strings`
+  - searching, replacing, comparing, trimming, splitting, and joining
+- `strconv`
+  - converting boolean, integer, and floating-point values to and from their string representations
+- `unicode`
+  - functions such as `IsDigit`, `IsLetter`, `IsUpper`, and `IsLower` for classifying runes
+
+A string contains an array of bytes that, once created, is *immutable*. Elements of a byte slice can be freely modified
+
+Strings can be converted to byte slices and back again:
+```go
+s := "abc"
+b := []byte(s)
+s2 := string(b)
+```
+
+### 3.6 Constants
+
+Constants are expressions whose value is known th the compiler and whose evaluation is 
+guaranteed to occur at compile time, not at run time. The underlying type of every constant is:
+boolean, string, or number.
+
+A `const` declaration defines named values that look like variables but whose value is constant. This prevents
+accidental changes during program execution.
+
+Since their values are known to the compiler, constant expressions may appear in types, specifically as the length of 
+an array type:
+
+```go
+
+const IPv4Len = 4
+// parseIPv4 parses an IPv4 address (d.d.d.d).
+func parseIPv4(s string) IP {
+    var p [IPv4Len]byte
+// ...
+}
+```
+
+## Chapter 4: Composite Types
+
+Arrays and structs are *aggregate* types; their values are concatenations of other values in memory.
+Arrays are homogeneous while structs are heterogeneous. Both arrays and structs are fixed size. In contrast,
+slices and maps are dynamic data structures that grow as values are added.
+
+### 4.1 Arrays
+
+An array is a fixed-length sequence of zero or more elements of a particular type. Because of their fixed length, 
+arrays are rarely used directly in Go. Slices, which can grow and shrink, are much more versatile, but to understand 
+slices we must understand arrays first.
+
+Individual array elements are accessed with the conventional subscript notion, where subscripts run from zero to one 
+less than the array length. 
+
+```go
+var a [3]int                    // array of 3 integers
+fmt.Println(a[0])               // print the first element
+fmt.Println(a[len(a)-1])        // print the last element, a[2]
+
+// Print the indices and elements/
+for i, v := range a {
+	fmt.Printf("%d %d\n", i, v)
+}
+// Print the elements only.
+for _, v := range a {
+	fmt.Printf("%d\n", v)
+}
+```
+
+An *array literal* can initialize an array with a list of values. Uninitialized values with be the zero value
+```go
+var q [3]int = [3]int{1, 2, 3}
+var r [3]int = [3]int{1, 2}
+fmt.Println(r[2])                       // "0"
+```
+
+In an array literal, if an ellipsis "..." appears in place of the length, the array length is determined by the number 
+of initializers. The definition of q can be simplified to:
+
+```go
+q := [...]int{1, 2, 3}
+fmt.Printf("%T\n", q)           // "[3]int"
+```
